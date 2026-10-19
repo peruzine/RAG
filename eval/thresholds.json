@@ -1,0 +1,17 @@
+{
+  "_comment": "CI 门禁阈值。数值取离线基线（hashing 向量 + 抽取式生成）实测值向下留余量：既能挡住真实回归，也不因正常抖动天天红。",
+  "_measure": "python -m ragkb.cli eval --retrieval-only   # 只看检索指标，用来定 hit/recall/mrr",
+  "_paraphrase_note": "评测集里有 4 条 paraphrase（改写提问）样本。纯词法门禁在这类问题上必然误拒——实测扫描过 refuse_coverage_floor：放宽到 0.10 时误答率涨到 0.50。所以 refusal_accuracy 的阈值按词法基线（0.808）留余量设为 0.75；换成语义 embedding + 语义门禁后实测 0.885，可以再上调。",
+  "_thresholds_note": "换用真实 embedding / 生成模型后应重新测量并上调阈值，而不是照搬离线值。参考 scripts/compare_configs.py 产出的对比表。",
+  "thresholds": {
+    "hit@k": 0.85,
+    "recall@k": 0.85,
+    "mrr": 0.7,
+    "ndcg@k": 0.8,
+    "refusal_accuracy": 0.75,
+    "citation_validity": 0.95,
+    "groundedness": 0.85,
+    "answer_f1": 0.25
+  },
+  "max_drop": 0.05
+}

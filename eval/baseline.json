@@ -1,0 +1,37 @@
+{
+  "overall": {
+    "n_cases": 26.0,
+    "n_gold_cases": 22.0,
+    "hit@k": 0.9545,
+    "recall@k": 0.9545,
+    "precision@k": 0.2091,
+    "mrr": 0.8273,
+    "ndcg@k": 0.9078,
+    "refusal_accuracy": 0.8077,
+    "answer_f1": 0.388,
+    "answer_contains": 0.1538,
+    "groundedness": 0.9412,
+    "citation_validity": 1.0,
+    "latency_ms_avg": 3.6036,
+    "refusal_rate": 0.3462
+  },
+  "meta": {
+    "generated_at": "2026-10-09 10:31:56",
+    "n_cases": 26,
+    "k": 5,
+    "retrieval_only": false,
+    "config": {
+      "embed": "hashing:hashing-512",
+      "llm": "scripted:gpt-4o-mini",
+      "rerank": "lexical",
+      "chunk": "800/120",
+      "retrieve": "cand=50 fuse=20 final=6",
+      "db": "C:\\Users\\86135\\Documents\\deepseek-harness\\default-workspace\\rag-kb\\data\\ragkb.sqlite3"
+    },
+    "components": {
+      "embedder": "hashing-512",
+      "llm": "scripted-extractive",
+      "reranker": "lexical"
+    }
+  }
+}

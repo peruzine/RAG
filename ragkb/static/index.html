@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>企业知识库问答 · ragkb</title>
+<style>
+  :root{
+    --bg:#0f1115; --panel:#171a21; --panel-2:#1e222b; --line:#2a2f3a;
+    --fg:#e6e9ef; --dim:#98a2b3; --accent:#4ea1ff; --ok:#3ecf8e; --warn:#ffb648; --bad:#ff6b6b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);
+       font:14px/1.65 -apple-system,"Segoe UI","Microsoft YaHei",system-ui,sans-serif}
+  a{color:var(--accent)}
+  header{display:flex;align-items:center;gap:16px;padding:14px 22px;
+         border-bottom:1px solid var(--line);background:var(--panel);position:sticky;top:0;z-index:9}
+  header h1{font-size:16px;margin:0;font-weight:600;letter-spacing:.3px}
+  header .badge{font-size:12px;color:var(--dim);border:1px solid var(--line);
+                border-radius:999px;padding:2px 10px}
+  header .grow{flex:1}
+  .wrap{display:grid;grid-template-columns:190px 1fr;min-height:calc(100vh - 57px)}
+  nav{border-right:1px solid var(--line);padding:16px 10px;background:var(--panel)}
+  nav button{display:block;width:100%;text-align:left;margin-bottom:6px;padding:9px 12px;
+             background:transparent;border:0;border-radius:8px;color:var(--dim);
+             font-size:14px;cursor:pointer}
+  nav button:hover{background:var(--panel-2);color:var(--fg)}
+  nav button.active{background:var(--panel-2);color:var(--fg);box-shadow:inset 2px 0 0 var(--accent)}
+  main{padding:22px;max-width:1080px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+        padding:16px 18px;margin-bottom:16px}
+  .card h2{margin:0 0 12px;font-size:14px;color:var(--dim);font-weight:600;
+           text-transform:uppercase;letter-spacing:.6px}
+  textarea,input,select{width:100%;background:var(--panel-2);border:1px solid var(--line);
+        border-radius:8px;color:var(--fg);padding:10px 12px;font:inherit;outline:none}
+  textarea:focus,input:focus{border-color:var(--accent)}
+  textarea{min-height:76px;resize:vertical}
+  .row{display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap}
+  .row label{color:var(--dim);font-size:13px}
+  .row input[type=text]{width:auto;flex:1;min-width:140px}
+  button.primary{background:var(--accent);color:#04121f;border:0;border-radius:8px;
+                 padding:9px 20px;font-weight:600;cursor:pointer}
+  button.primary:disabled{opacity:.5;cursor:not-allowed}
+  button.ghost{background:transparent;border:1px solid var(--line);color:var(--dim);
+               border-radius:8px;padding:7px 12px;cursor:pointer;font-size:13px}
+  button.ghost:hover{color:var(--fg);border-color:var(--accent)}
+  .answer{white-space:pre-wrap;line-height:1.85;font-size:15px}
+  .cite{display:inline-block;background:rgba(78,161,255,.16);color:var(--accent);
+        border-radius:5px;padding:0 6px;margin:0 2px;font-size:12px;cursor:pointer}
+  .meta{margin-top:10px;font-size:12px;color:var(--dim);display:flex;gap:14px;flex-wrap:wrap}
+  .meta b{color:var(--fg);font-weight:600}
+  .src{border-left:2px solid var(--accent);padding:6px 0 6px 12px;margin:10px 0;font-size:13px}
+  .src .h{color:var(--dim);font-size:12px}
+  .src .q{color:var(--fg);opacity:.85}
+  .pill{font-size:11px;border-radius:999px;padding:1px 8px;border:1px solid var(--line);color:var(--dim)}
+  .pill.ok{color:var(--ok);border-color:rgba(62,207,142,.4)}
+  .pill.bad{color:var(--bad);border-color:rgba(255,107,107,.4)}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
+  th{color:var(--dim);font-weight:600}
+  pre{background:var(--panel-2);border:1px solid var(--line);border-radius:8px;
+      padding:12px;overflow:auto;font-size:12px;max-height:520px}
+  .hidden{display:none}
+  .hint{color:var(--dim);font-size:12px;margin-top:6px}
+  .refused{color:var(--warn)}
+  .flexline{display:flex;gap:8px;align-items:center}
+  .flexline input{flex:1}
+  .spin{display:inline-block;width:10px;height:10px;border:2px solid var(--dim);
+        border-top-color:transparent;border-radius:50%;animation:s .7s linear infinite}
+  @keyframes s{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<header>
+  <h1>企业知识库问答</h1>
+  <span class="badge" id="badge-corpus">加载中…</span>
+  <span class="badge" id="badge-comp"></span>
+  <span class="grow"></span>
+  <span class="badge" id="badge-warn"></span>
+</header>
+
+<div class="wrap">
+  <nav>
+    <button data-tab="ask" class="active">问答</button>
+    <button data-tab="docs">文档管理</button>
+    <button data-tab="metrics">运行指标</button>
+  </nav>
+
+  <main>
+    <!-- ============ 问答 ============ -->
+    <section id="tab-ask">
+      <div class="card">
+        <h2>提问</h2>
+        <textarea id="q" placeholder="例如：P0 故障的首次响应时间和解决时限分别是多少？"></textarea>
+        <div class="row">
+          <label>角色</label>
+          <input type="text" id="roles" value="public" title="逗号分隔；all 表示不过滤（仅调试用）">
+          <label>上下文条数</label>
+          <input type="text" id="topk" value="" style="width:64px" placeholder="6">
+          <button class="primary" id="ask">提问</button>
+          <button class="ghost" id="clear">清空</button>
+        </div>
+        <div class="hint">角色对应文档的权限标签：<code>public</code> 全体可见，<code>internal</code> 需显式加入。检索阶段即按角色过滤。</div>
+      </div>
+
+      <div class="card" id="ctx-card" style="display:none">
+        <h2>检索到的依据 <span class="pill" id="ctx-count"></span></h2>
+        <div id="ctx-list"></div>
+      </div>
+
+      <div class="card">
+        <h2>回答 <span id="status"></span></h2>
+        <div class="answer" id="answer-text"><span style="color:var(--dim)">等待提问…</span></div>
+        <div class="meta" id="meta"></div>
+        <div class="row" id="fb" style="display:none">
+          <button class="ghost" data-rating="1">👍 有用</button>
+          <button class="ghost" data-rating="-1">👎 没用</button>
+          <input type="text" id="fb-comment" placeholder="补充说明（可选）">
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 文档 ============ -->
+    <section id="tab-docs" class="hidden">
+      <div class="card">
+        <h2>上传文档（文本类）</h2>
+        <div class="flexline">
+          <input type="text" id="up-name" placeholder="文件名，例如 新制度.md（扩展名决定解析方式）">
+          <input type="text" id="up-acl" value="public" style="width:130px" placeholder="acl">
+        </div>
+        <textarea id="up-body" style="margin-top:10px;min-height:150px" placeholder="粘贴文档内容（Markdown / 纯文本）"></textarea>
+        <div class="row">
+          <button class="primary" id="upload">上传并入库</button>
+          <span class="hint" id="up-msg"></span>
+        </div>
+        <div class="hint">支持 .md .txt .html .csv .docx .xlsx .pdf（后三者需对应可选依赖，缺失时会在入库报告中说明）。</div>
+      </div>
+      <div class="card">
+        <h2>已入库文档 <span class="pill" id="doc-count"></span></h2>
+        <table>
+          <thead><tr><th>标题</th><th>来源</th><th>切块</th><th>权限</th><th>版本</th><th></th></tr></thead>
+          <tbody id="doc-rows"></tbody>
+        </table>
+        <div class="row"><button class="ghost" id="reload-docs">刷新</button></div>
+      </div>
+    </section>
+
+    <!-- ============ 指标 ============ -->
+    <section id="tab-metrics" class="hidden">
+      <div class="card">
+        <h2>运行指标</h2>
+        <div class="row"><button class="ghost" id="reload-metrics">刷新</button>
+          <span class="hint">来自 data/traces.jsonl 与 feedback.jsonl 的实时聚合</span></div>
+        <pre id="metrics-json">加载中…</pre>
+      </div>
+      <div class="card">
+        <h2>语料与组件</h2>
+        <pre id="stats-json">加载中…</pre>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => (s ?? "").replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+
+/* ---------- 标签页 ---------- */
+document.querySelectorAll("nav button").forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll("nav button").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    ["ask","docs","metrics"].forEach(t => $("tab-"+t).classList.toggle("hidden", t !== btn.dataset.tab));
+    if (btn.dataset.tab === "docs") loadDocs();
+    if (btn.dataset.tab === "metrics") loadMetrics();
+  };
+});
+
+/* ---------- 启动时拉健康信息 ---------- */
+async function boot(){
+  try{
+    const h = await (await fetch("/health")).json();
+    $("badge-corpus").textContent = `${h.documents} 篇文档 / ${h.chunks} 个切块`;
+    const c = h.components || {};
+    $("badge-comp").textContent = `${c.llm} · ${c.embedder?.name || ""} · rerank:${c.reranker?.name || "-"}`;
+    if (h.warnings && h.warnings.length){
+      $("badge-warn").textContent = "⚠ " + h.warnings.length + " 条配置告警";
+      $("badge-warn").title = h.warnings.join("\n");
+    } else { $("badge-warn").textContent = "✓ 配置正常"; }
+  }catch(e){ $("badge-corpus").textContent = "无法连接服务"; }
+}
+boot();
+
+/* ---------- 流式问答 ---------- */
+let current = { question:"", answer:"", traceId:"" };
+let busy = false;
+
+function rolesHeader(){
+  const v = $("roles").value.trim();
+  return v ? {"X-User-Roles": v} : {};
+}
+
+$("ask").onclick = ask;
+$("q").addEventListener("keydown", e => { if (e.key === "Enter" && (e.metaKey||e.ctrlKey)) ask(); });
+$("clear").onclick = () => {
+  $("q").value = ""; $("answer-text").innerHTML = '<span style="color:var(--dim)">等待提问…</span>';
+  $("meta").innerHTML = ""; $("ctx-card").style.display = "none"; $("fb").style.display = "none";
+  $("status").innerHTML = "";
+};
+
+async function ask(){
+  const question = $("q").value.trim();
+  if (!question || busy) return;
+  busy = true; $("ask").disabled = true;
+  $("status").innerHTML = '<span class="spin"></span> 检索中';
+  $("answer-text").textContent = "";
+  $("meta").innerHTML = ""; $("fb").style.display = "none";
+  const topk = $("topk").value.trim();
+
+  try{
+    const resp = await fetch("/chat", {
+      method: "POST",
+      headers: {"Content-Type": "application/json", ...rolesHeader()},
+      body: JSON.stringify({question, top_k: topk ? parseInt(topk,10) : null})
+    });
+    if (!resp.ok){ throw new Error("HTTP " + resp.status + " " + await resp.text()); }
+
+    const reader = resp.body.getReader();
+    const dec = new TextDecoder();
+    let buf = "", text = "";
+    while (true){
+      const {value, done} = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, {stream:true});
+      const parts = buf.split("\n\n");
+      buf = parts.pop();
+      for (const part of parts){
+        const line = part.trim();
+        if (!line.startsWith("data:")) continue;
+        const payload = line.slice(5).trim();
+        if (payload === "[DONE]") continue;
+        const ev = JSON.parse(payload);
+        if (ev.type === "meta"){
+          renderContexts(ev.contexts, ev.retrieval, ev.refuse_reason);
+          $("status").innerHTML = '<span class="spin"></span> 生成中';
+        } else if (ev.type === "delta"){
+          text += ev.text;
+          $("answer-text").textContent = text;
+        } else if (ev.type === "done"){
+          finish(ev.answer, question);
+        }
+      }
+    }
+  }catch(e){
+    $("answer-text").textContent = "请求失败：" + e.message;
+    $("status").innerHTML = "";
+  }finally{
+    busy = false; $("ask").disabled = false;
+  }
+}
+
+function renderContexts(contexts, retrieval, refuseReason){
+  $("ctx-card").style.display = "block";
+  $("ctx-count").textContent =
+    `${contexts.length} 条 · 召回 bm25=${retrieval.lexical_hits} / vector=${retrieval.vector_hits}` +
+    ` · 覆盖率 ${retrieval.coverage}` + (refuseReason ? ` · 门禁 ${refuseReason}` : "");
+  $("ctx-list").innerHTML = contexts.map(c => `
+    <div class="src">
+      <div class="h">[${c.index}] ${esc(c.title)} › ${esc(c.heading_path)} · score ${c.score}</div>
+      <div class="q">${esc(c.snippet)}</div>
+    </div>`).join("");
+}
+
+function finish(a, question){
+  current = {question, answer: a.text, traceId: a.trace_id};
+  $("answer-text").textContent = a.text;
+  const r = a.debug?.retrieval || {};
+  const stages = Object.entries(r.timings_ms || {}).map(([k,v]) => `${k} ${v}ms`).join(" · ");
+  $("status").innerHTML = a.refused
+    ? '<span class="pill bad">已拒答</span>'
+    : '<span class="pill ok">已作答</span>';
+  $("meta").innerHTML = `
+    <span>耗时 <b>${a.latency_ms}ms</b></span>
+    <span>tokens <b>${a.usage.total_tokens}</b></span>
+    <span>成本 <b>$${a.cost_usd}</b></span>
+    <span>引用 <b>${a.citations.length}</b></span>
+    <span>拒答原因 <b>${a.debug?.refuse_reason || "-"}</b></span>
+    <span>trace <b>${a.trace_id}</b></span>
+    <span style="flex-basis:100%">阶段：${stages}</span>`;
+  $("fb").style.display = "flex";
+}
+
+$("fb").querySelectorAll("button[data-rating]").forEach(b => {
+  b.onclick = async () => {
+    await fetch("/feedback", {
+      method:"POST",
+      headers:{"Content-Type":"application/json", ...rolesHeader()},
+      body: JSON.stringify({trace_id: current.traceId, question: current.question,
+                            answer: current.answer, rating: parseInt(b.dataset.rating,10),
+                            comment: $("fb-comment").value})
+    });
+    b.textContent = "已提交 ✓";
+    setTimeout(() => { $("fb").style.display = "none"; }, 1200);
+  };
+});
+
+/* ---------- 文档 ---------- */
+async function loadDocs(){
+  const data = await (await fetch("/documents", {headers: rolesHeader()})).json();
+  $("doc-count").textContent = data.count + " 篇";
+  $("doc-rows").innerHTML = (data.documents||[]).map(d => `
+    <tr>
+      <td>${esc(d.title)}</td>
+      <td style="color:var(--dim);font-size:12px">${esc((d.source||"").split("/").pop())}</td>
+      <td>${d.n_chunks}</td>
+      <td>${(d.acl||[]).map(x=>`<span class="pill">${esc(x)}</span>`).join(" ")}</td>
+      <td>v${d.version}</td>
+      <td><button class="ghost" data-del="${esc(d.doc_id)}">删除</button></td>
+    </tr>`).join("") || '<tr><td colspan="6" style="color:var(--dim)">还没有文档，先上传或用 CLI 入库</td></tr>';
+  $("doc-rows").querySelectorAll("button[data-del]").forEach(b => {
+    b.onclick = async () => {
+      if (!confirm("确认删除该文档及其全部切块？")) return;
+      await fetch("/documents/" + encodeURIComponent(b.dataset.del), {method:"DELETE", headers: rolesHeader()});
+      loadDocs(); boot();
+    };
+  });
+}
+$("reload-docs").onclick = loadDocs;
+
+$("upload").onclick = async () => {
+  const filename = $("up-name").value.trim(), content = $("up-body").value;
+  if (!filename || !content){ $("up-msg").textContent = "文件名和内容都不能为空"; return; }
+  $("up-msg").innerHTML = '<span class="spin"></span> 入库中（切块 + 向量化）…';
+  const resp = await fetch("/documents", {
+    method:"POST",
+    headers:{"Content-Type":"application/json", ...rolesHeader()},
+    body: JSON.stringify({filename, content, acl: $("up-acl").value})
+  });
+  const data = await resp.json();
+  $("up-msg").textContent = resp.ok
+    ? `${data.status}：${data.n_chunks} 个切块${data.report ? " · " + data.report : ""}`
+    : "失败：" + (data.error || JSON.stringify(data));
+  if (resp.ok){ $("up-body").value = ""; $("up-name").value = ""; loadDocs(); boot(); }
+};
+
+/* ---------- 指标 ---------- */
+async function loadMetrics(){
+  const m = await (await fetch("/metrics", {headers: rolesHeader()})).json();
+  $("metrics-json").textContent = JSON.stringify(m, null, 2);
+  const s = await (await fetch("/stats", {headers: rolesHeader()})).json();
+  $("stats-json").textContent = JSON.stringify(s, null, 2);
+}
+$("reload-metrics").onclick = loadMetrics;
+</script>
+</body>
+</html>

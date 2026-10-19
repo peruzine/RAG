@@ -1,0 +1,56 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "ragkb: serve（启动 Web UI，Ctrl+Shift+B）",
+      "type": "process",
+      "command": "${workspaceFolder}\\.venv\\Scripts\\python.exe",
+      "args": ["-u", "-m", "ragkb.cli", "serve", "--host", "127.0.0.1", "--port", "8000"],
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": { "PYTHONIOENCODING": "utf-8" }
+      },
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": true },
+      "group": { "kind": "build", "isDefault": true }
+    },
+    {
+      "label": "ragkb: test（全部单测）",
+      "type": "process",
+      "command": "${workspaceFolder}\\.venv\\Scripts\\python.exe",
+      "args": ["-m", "unittest", "discover", "-s", "tests", "-t", ".", "-v"],
+      "options": { "cwd": "${workspaceFolder}", "env": { "PYTHONIOENCODING": "utf-8" } },
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": true },
+      "group": { "kind": "test", "isDefault": true }
+    },
+    {
+      "label": "ragkb: eval（评测 + CI 门禁）",
+      "type": "process",
+      "command": "${workspaceFolder}\\.venv\\Scripts\\python.exe",
+      "args": ["-m", "ragkb.cli", "eval", "--verbose"],
+      "options": { "cwd": "${workspaceFolder}", "env": { "PYTHONIOENCODING": "utf-8" } },
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": true }
+    },
+    {
+      "label": "ragkb: demo（入库示例语料）",
+      "type": "process",
+      "command": "${workspaceFolder}\\.venv\\Scripts\\python.exe",
+      "args": ["-m", "ragkb.cli", "demo"],
+      "options": { "cwd": "${workspaceFolder}", "env": { "PYTHONIOENCODING": "utf-8" } },
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": true }
+    },
+    {
+      "label": "ragkb: compare（多配置对比评测）",
+      "type": "process",
+      "command": "${workspaceFolder}\\.venv\\Scripts\\python.exe",
+      "args": ["scripts/compare_configs.py"],
+      "options": { "cwd": "${workspaceFolder}", "env": { "PYTHONIOENCODING": "utf-8" } },
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": true }
+    }
+  ]
+}

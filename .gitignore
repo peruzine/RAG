@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+
+# 本地配置（含密钥）
+.env
+
+# 运行期数据：数据库、索引、trace、上传件
+data/*.sqlite3
+data/*.sqlite3-wal
+data/*.sqlite3-shm
+data/traces.jsonl
+data/feedback.jsonl
+data/uploads/
+data/_smoke/
+data/_tests/
+data/_probe/
+data/_*.log
+data/_compare/
+data/_diag/
+data/_piptmp/
+
+# 本地模型权重（几十 MB 起，用 scripts/fetch_model.py 重新下载）
+models/
+
+# 评测产物（latest.json 可留可删，报告体积大，默认忽略）
+eval/reports/
+
+# 编辑器
+.idea/
+.DS_Store
+
+# VS Code：忽略个人设置，但**保留**共享的运行/调试配置
+# （"一键在集成终端跑起来"这件事靠的就是这几个文件，不能一起忽略掉）
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json

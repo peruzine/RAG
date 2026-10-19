@@ -1,0 +1,33 @@
+// 评测集：每行一个 JSON 样本（JSONL）。字段说明见 ragkb/evaluate.py::load_dataset
+// 标注原则：
+//   * gold_snippets 用**语料里真实存在的连续片段**，不要自己改写 → 自动校验会检查
+//   * gold_sources 只用于归因与自检，相关性判定以 gold_snippets 为准（更严格）
+//   * 语料里没有答案的问题一律 should_refuse=true，用来度量"敢不敢说不知道"
+{"id":"onboard-probation","question":"试用期最长可以多久？","tags":["fact","table"],"gold_sources":["员工入职与试用期管理规定.md"],"gold_snippets":["无固定期限"],"gold_answer":"三年以上固定期限和无固定期限劳动合同的试用期上限为六个月，且试用期包含在劳动合同期限内。"}
+{"id":"onboard-review","question":"转正考核由谁参与、考核哪些维度？","tags":["fact"],"gold_sources":["员工入职与试用期管理规定.md"],"gold_snippets":["业务结果（50%）"],"gold_answer":"由直属主管、部门负责人与 HRBP 三方参与，维度为业务结果 50%、专业能力 30%、协作与文化 20%。"}
+{"id":"onboard-materials","question":"入职当天需要提交哪些材料？","tags":["list"],"gold_sources":["员工入职与试用期管理规定.md"],"gold_snippets":["近三个月内的入职体检报告"],"gold_answer":"身份证原件及复印件、学历学位证书、离职证明、本人银行卡复印件、近三个月内的入职体检报告、一寸白底免冠照片两张。"}
+{"id":"onboard-device","question":"研发岗位标配哪些设备，一般多久能领到？","tags":["multi_question"],"gold_sources":["员工入职与试用期管理规定.md"],"gold_snippets":["人体工学椅"],"gold_answer":"标配笔记本电脑、扩展坞和人体工学椅；IT 每周一、周四集中备货，最迟入职次日领到。"}
+{"id":"sla-p0","question":"P0 故障的首次响应时间和解决时限分别是多少？","tags":["fact","table"],"gold_sources":["产品技术支持SLA与故障分级.md"],"gold_snippets":["15 分钟"],"gold_answer":"P0 故障首次响应 15 分钟，每 30 分钟更新一次状态，解决时限 4 小时。"}
+{"id":"sla-compensation","question":"SLA 未达标最多能赔多少？","tags":["fact"],"gold_sources":["产品技术支持SLA与故障分级.md"],"gold_snippets":["不超过当月服务费的 30%"],"gold_answer":"单月赔付总额不超过当月服务费的 30%，以服务费抵扣券形式在次月账单兑现。"}
+{"id":"sla-ticket","question":"提交工单时应该提供哪些信息？","tags":["list"],"gold_sources":["产品技术支持SLA与故障分级.md"],"gold_snippets":["集群 ID"],"gold_answer":"集群 ID、发生时间（含时区）、影响范围与业务量级、可复现步骤、最近 30 分钟的组件日志，以及已尝试的规避手段。"}
+{"id":"deploy-python","question":"部署知识库平台需要什么 Python 版本？","tags":["fact","table"],"gold_sources":["知识库平台部署与配置手册.md"],"gold_snippets":["3.11"],"gold_answer":"最低 Python 3.11，推荐 3.12。"}
+{"id":"deploy-embed-switch","question":"更换 embedding 模型后需要注意什么？","tags":["fact"],"gold_sources":["知识库平台部署与配置手册.md"],"gold_snippets":["必须重新入库"],"gold_answer":"必须重新入库（ingest --force），否则新旧向量不在同一向量空间，检索结果会明显变差。"}
+{"id":"deploy-backup","question":"备份数据需要复制哪个文件？","tags":["fact"],"gold_sources":["知识库平台部署与配置手册.md"],"gold_snippets":["ragkb.sqlite3"],"gold_answer":"复制 ragkb.sqlite3；WAL 模式下应先做 checkpoint 或停服后再复制。"}
+{"id":"expense-hotel","question":"出差住宿一线城市每晚上限是多少？","tags":["fact","table"],"gold_sources":["费用报销制度.md"],"gold_snippets":["700"],"gold_answer":"一线城市（北上广深）每晚上限 700 元（含税）。"}
+{"id":"expense-payment","question":"报销款一般什么时候到账？","tags":["fact"],"gold_sources":["费用报销制度.md"],"gold_snippets":["每周二、周五"],"gold_answer":"财务每周二、周五两次集中付款，付款后 3 个工作日到账。"}
+{"id":"expense-meal","question":"出差餐补每天多少钱？","tags":["fact"],"gold_sources":["费用报销制度.md"],"gold_snippets":["120 元/天"],"gold_answer":"出差餐补 120 元/天，当日往返不享受餐补。"}
+{"id":"expense-invoice","question":"电子发票提交有什么要求？","tags":["fact"],"gold_sources":["费用报销制度.md"],"gold_snippets":["电子发票需提供 PDF 原件"],"gold_answer":"电子发票需提供 PDF 原件，不接受截图；抬头必须是公司全称与纳税人识别号。"}
+{"id":"expense-approval","question":"单笔 8000 元的费用需要谁审批？","tags":["fact","table"],"gold_sources":["费用报销制度.md"],"gold_snippets":["2,001 – 10,000"],"gold_answer":"2,001–10,000 元区间由部门负责人审批。"}
+{"id":"acl-salary-public","question":"P6 职级的薪酬带宽上限是多少？","tags":["acl","refusal"],"roles":["public"],"should_refuse":true,"note":"internal 标签文档，public 角色不应看到，必须拒答而不是编造"}
+{"id":"acl-salary-internal","question":"P6 职级的薪酬带宽上限是多少？","tags":["acl"],"roles":["public","internal"],"gold_sources":["薪酬等级带宽说明.md"],"gold_snippets":["84.0"],"gold_answer":"P6 中位值 70 万元/年，带宽区间 56.0–84.0 万元，上限为 84.0 万元。"}
+{"id":"refuse-offsite","question":"公司年会在哪里举办？","tags":["refusal","unanswerable"],"should_refuse":true}
+{"id":"refuse-competitor","question":"竞品飞鸟数据的报价是多少？","tags":["refusal","unanswerable"],"should_refuse":true}
+{"id":"refuse-personal","question":"张伟的手机号码是多少？","tags":["refusal","unanswerable"],"should_refuse":true}
+{"id":"multiturn-condense","question":"那它的解决时限是多久？","tags":["multi_turn"],"history":[{"role":"user","content":"P0 故障是怎么定义的？"},{"role":"assistant","content":"P0 指核心链路完全不可用、存在数据丢失或泄露风险且无规避方案的故障。"}],"gold_sources":["产品技术支持SLA与故障分级.md"],"gold_snippets":["4 小时"],"gold_answer":"P0 故障的解决时限是 4 小时。","note":"依赖多轮改写：'它' 必须被还原成 P0 故障"}
+{"id":"short-term","question":"SLA 是什么？","tags":["short_query"],"gold_sources":["产品技术支持SLA与故障分级.md"],"gold_snippets":["服务等级协议"],"gold_answer":"SLA 即服务等级协议，本文中指对客户提供技术支持的服务等级约定。"}
+// 改写类（paraphrase）：用户不会照着文档的措辞提问。这类样本专门用来暴露"纯词法检索"的短板，
+// 也是唯一能体现语义 embedding 价值的场景——问句与文档几乎没有共同词条。
+{"id":"para-hotel","question":"酒店一晚上最多能报多少钱？","tags":["paraphrase"],"gold_sources":["费用报销制度.md"],"gold_snippets":["700"],"gold_answer":"一线城市住宿每晚上限 700 元。","note":"'酒店' vs 文档的'住宿'，'报' vs '报销'"}
+{"id":"para-onboarding","question":"新同事第一天来要带哪些东西？","tags":["paraphrase"],"gold_sources":["员工入职与试用期管理规定.md"],"gold_snippets":["近三个月内的入职体检报告"],"gold_answer":"身份证、学历学位证书、离职证明、银行卡复印件、体检报告、照片等材料。","note":"'新同事/第一天/带' vs 文档的'新员工/报到当天/提交'"}
+{"id":"para-outage","question":"服务彻底宕掉而且可能丢数据，这算哪一级故障？","tags":["paraphrase"],"gold_sources":["产品技术支持SLA与故障分级.md"],"gold_snippets":["无规避方案"],"gold_answer":"P0（致命）：核心链路完全不可用、存在数据丢失或泄露风险，且无规避方案。","note":"'宕掉/丢数据' vs 文档的'完全不可用/数据丢失'"}
+{"id":"para-lateclaim","question":"单据交晚了还能报吗？","tags":["paraphrase"],"gold_sources":["费用报销制度.md"],"gold_snippets":["逾期视为放弃"],"gold_answer":"不能。单据须在 30 个自然日内提交财务，逾期视为放弃。","note":"'交晚了' vs 文档的'逾期'"}

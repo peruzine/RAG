@@ -1,0 +1,61 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "ragkb: serve（带断点调试）",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "ragkb.cli",
+      "args": ["serve", "--host", "127.0.0.1", "--port", "8000"],
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}\\.venv\\Scripts\\python.exe",
+      "console": "integratedTerminal",
+      "justMyCode": false,
+      "env": { "PYTHONIOENCODING": "utf-8" }
+    },
+    {
+      "name": "ragkb: ask（运行时会提示输入问题）",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "ragkb.cli",
+      "args": ["ask", "${input:question}", "--show-context"],
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}\\.venv\\Scripts\\python.exe",
+      "console": "integratedTerminal",
+      "justMyCode": false,
+      "env": { "PYTHONIOENCODING": "utf-8" }
+    },
+    {
+      "name": "ragkb: eval（评测 + 门禁）",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "ragkb.cli",
+      "args": ["eval", "--verbose"],
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}\\.venv\\Scripts\\python.exe",
+      "console": "integratedTerminal",
+      "justMyCode": false,
+      "env": { "PYTHONIOENCODING": "utf-8" }
+    },
+    {
+      "name": "Python: 当前测试文件",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "unittest",
+      "args": ["${file}", "-v"],
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}\\.venv\\Scripts\\python.exe",
+      "console": "integratedTerminal",
+      "justMyCode": false,
+      "env": { "PYTHONIOENCODING": "utf-8" }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "question",
+      "type": "promptString",
+      "description": "要问知识库的问题",
+      "default": "酒店一晚上最多能报多少钱？"
+    }
+  ]
+}

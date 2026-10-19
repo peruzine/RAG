@@ -1,0 +1,53 @@
+# 单机部署：SQLite 直接落在挂载卷上，重启不丢数据。
+#
+#   cp .env.example .env   # 按需填 API Key
+#   docker compose up -d --build
+#   curl http://127.0.0.1:8000/health
+#
+# 需要横向扩展时的替换点写在 README「容量与演进」一节：
+# 向量通道换 Milvus/Qdrant，词法通道换 OpenSearch，RagApp 的装配处不用改。
+
+services:
+  ragkb:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ragkb:0.1.0
+    container_name: ragkb
+    restart: unless-stopped
+    ports:
+      - "${RAGKB_API_PORT:-8000}:8000"
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      RAGKB_DATA_DIR: /app/data
+      RAGKB_DB_PATH: /app/data/ragkb.sqlite3
+      RAGKB_API_HOST: 0.0.0.0
+    volumes:
+      # 数据库 / trace / 上传件持久化
+      - ragkb-data:/app/data
+      # 语料目录：改完文件执行 docker compose exec ragkb python -m ragkb.cli ingest /app/data/corpus
+      - ./data/corpus:/app/data/corpus:ro
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=4).status==200 else 1)"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  ragkb-data:
